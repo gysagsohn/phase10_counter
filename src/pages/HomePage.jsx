@@ -9,10 +9,14 @@ import ScoreTable from '../components/ScoreTable';
 import { useGameData } from '../contexts/GameContext';
 
 function HomePage() {
+  // Pull winner state and tie-breaker mode from global context
   const { winner, tieBreakerActive } = useGameData();
+   // Ref for scrolling to the winner message
   const winnerRef = useRef(null);
+  // Used to force return to setup mode (used when New Game is triggered)
   const [forceSetup, setForceSetup] = useState(false);
 
+  // Trigger confetti and scroll to winner when game ends
   useEffect(() => {
     if (winner && !Array.isArray(winner) && winnerRef.current) {
       winnerRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -24,6 +28,7 @@ function HomePage() {
     }
   }, [winner]);
 
+   // Handler to trigger setup screen from GameControls
   const handleNewGame = () => {
     setForceSetup(true);
   };
@@ -64,15 +69,14 @@ function HomePage() {
 
       <Divider sx={{ my: 2 }} />
 
-      <Stack
-        spacing={2}
-        sx={{
-          my: 3,
-          flexDirection: { xs: 'column', sm: 'row' },
-          justifyContent: 'space-between',
-          alignItems: { xs: 'flex-start', sm: 'center' }
-        }}
-      >
+        <Stack
+          spacing={{ xs: 2, sm: 4 }} // more horizontal spacing on sm+
+          direction={{ xs: 'column', sm: 'row' }}
+          sx={{
+            my: 3,
+            alignItems: { xs: 'flex-start', sm: 'stretch' }
+          }}
+        >
         <Box sx={{ width: '100%' }}>
           <PhaseTracker />
         </Box>

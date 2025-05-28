@@ -17,15 +17,17 @@ import {
 import { useState } from 'react';
 import { useGameData, useGameUpdate } from '../contexts/GameContext';
 
+// Sort players by highest phase, then lowest score
 function getRankings(players) {
   return [...players].sort((a, b) => {
     if ((b.phase ?? 1) !== (a.phase ?? 1)) {
-      return (b.phase ?? 1) - (a.phase ?? 1); // higher phase wins
+      return (b.phase ?? 1) - (a.phase ?? 1); // Higher phase wins
     }
-    return (a.score ?? 0) - (b.score ?? 0); // lower score wins
+    return (a.score ?? 0) - (b.score ?? 0); // Lower score wins
   });
 }
 
+// Assign medals based on final rankings if winner is declared
 function assignMedals(rankedPlayers, winnerDeclared) {
   const medals = Array(rankedPlayers.length).fill(null);
   if (!winnerDeclared) return medals;
@@ -45,7 +47,7 @@ function assignMedals(rankedPlayers, winnerDeclared) {
     else if (rank === 3) medals[i] = '🥉';
   }
 
-  // Wooden Spoon logic
+  // Wooden spoon = lowest phase + highest score
   const lowestPhase = Math.min(...rankedPlayers.map((p) => p.phase));
   const spoonCandidates = rankedPlayers.filter(p => p.phase === lowestPhase);
   const worstScore = Math.max(...spoonCandidates.map(p => p.score));
@@ -59,6 +61,7 @@ function assignMedals(rankedPlayers, winnerDeclared) {
   return medals;
 }
 
+// Determine current star leader(s) — highest phase + lowest score
 function getStarLeaders(players) {
   if (players.length === 0) return [];
   const maxPhase = Math.max(...players.map((p) => p.phase));
@@ -76,6 +79,8 @@ export default function ScoreTable() {
   const rankedPlayers = getRankings(players);
   const winnerDeclared = !!winner && !Array.isArray(winner);
   const medals = assignMedals(rankedPlayers, winnerDeclared);
+
+  // Only show ⭐ once game has actually started
   const showStars = players.some(p => p.phase > 1 || p.score > 0);
   const starLeaders = showStars ? getStarLeaders(players) : [];
 
@@ -88,6 +93,7 @@ export default function ScoreTable() {
 
   return (
     <Box>
+      {/* Header and Edit toggle */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
         <Typography variant="h6">Score Table</Typography>
         <Button variant="outlined" onClick={handleToggleEdit} size="small">
@@ -95,6 +101,7 @@ export default function ScoreTable() {
         </Button>
       </Box>
 
+      {/* Score Table */}
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
@@ -114,6 +121,8 @@ export default function ScoreTable() {
               const score = player.score ?? 0;
               const lastPhase = player.lastPhasePlayed;
               const passed = player.lastPassedPhase;
+
+              // Display medal or star based on game state
               const medal = winnerDeclared
                 ? medals[index]
                 : (starLeaders.includes(player.name) ? '⭐' : null);
@@ -126,10 +135,12 @@ export default function ScoreTable() {
                     fontWeight: medal === '🥇' ? 'bold' : 'normal'
                   }}
                 >
+                  {/* Player name + medal/star */}
                   <TableCell sx={{ fontSize: isTinyScreen ? '0.7rem' : '0.875rem', p: isTinyScreen ? 0.5 : 1 }}>
                     {player.name} {medal && <span role="img" aria-label="medal">{medal}</span>}
                   </TableCell>
 
+                  {/* Phase (editable if in edit mode) */}
                   <TableCell align="center" sx={{ p: isTinyScreen ? 0.5 : 1 }}>
                     {isEditing ? (
                       <TextField
@@ -145,6 +156,7 @@ export default function ScoreTable() {
                     )}
                   </TableCell>
 
+                  {/* Score (editable if in edit mode) */}
                   <TableCell align="center" sx={{ p: isTinyScreen ? 0.5 : 1 }}>
                     {isEditing ? (
                       <TextField
@@ -160,6 +172,7 @@ export default function ScoreTable() {
                     )}
                   </TableCell>
 
+                  {/* Last phase played + outcome icon (✓ or ✗) */}
                   {!isTinyScreen && (
                     <TableCell align="center">
                       {lastPhase ? (

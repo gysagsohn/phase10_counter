@@ -4,24 +4,29 @@ const GameDataContext = createContext();
 const GameUpdateContext = createContext();
 
 export function GameProvider({ children }) {
+  // Load players from localStorage on init
   const [players, setPlayers] = useState(() => {
     const saved = localStorage.getItem('phase10-players');
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Load dealer index from localStorage on init
   const [dealerIndex, setDealerIndex] = useState(() => {
     const saved = localStorage.getItem('phase10-dealerIndex');
     return saved ? JSON.parse(saved) : 0;
   });
 
-  const [winner, setWinner] = useState(null);
-  const [tieBreakerActive, setTieBreakerActive] = useState(false);
+  const [winner, setWinner] = useState(null); // Stores winner object or array for tie
+  const [tieBreakerActive, setTieBreakerActive] = useState(false); // Controls tie-breaker state
+  const [previousPlayers, setPreviousPlayers] = useState([]); // Stores previous round players (for undo)
 
+  // Persist player and dealer data to localStorage
   useEffect(() => {
     localStorage.setItem('phase10-players', JSON.stringify(players));
     localStorage.setItem('phase10-dealerIndex', JSON.stringify(dealerIndex));
   }, [players, dealerIndex]);
 
+  // Add a player if name doesn't already exist
   const addPlayer = (name) => {
     if (players.some((p) => p.name === name)) return;
     setPlayers((prev) => [...prev, { name, score: 0, phase: 1 }]);
@@ -51,15 +56,18 @@ export function GameProvider({ children }) {
     setDealerIndex(0);
     setWinner(null);
     setTieBreakerActive(false);
+    setPreviousPlayers([]);
     localStorage.removeItem('phase10-players');
     localStorage.removeItem('phase10-dealerIndex');
   };
 
   const fullResetGame = () => {
-    resetGame(); // same for now
+    resetGame();
   };
 
   const applyRoundResults = (resultsArray) => {
+    setPreviousPlayers(JSON.parse(JSON.stringify(players))); // Deep clone for undo
+
     const updatedPlayers = players.map((player) => {
       const result = resultsArray.find((r) => r.name === player.name);
       if (!result) return player;
@@ -85,6 +93,7 @@ export function GameProvider({ children }) {
         setWinner(potentialWinners[0]);
         setTieBreakerActive(false);
       } else {
+        // Tie-breaker logic
         const tieBreakerNames = potentialWinners.map((p) => p.name);
         const tieBreakerPlayers = updatedPlayers.map((p) =>
           tieBreakerNames.includes(p.name)
@@ -101,6 +110,15 @@ export function GameProvider({ children }) {
     setPlayers(updatedPlayers);
   };
 
+  const undoLastRound = () => {
+    if (previousPlayers.length > 0) {
+      setPlayers(previousPlayers);
+      setWinner(null);
+      setTieBreakerActive(false);
+      setPreviousPlayers([]);
+    }
+  };
+
   const getLeadingPlayerNames = () => {
     if (players.length === 0) return [];
 
@@ -113,6 +131,30 @@ export function GameProvider({ children }) {
     const inMaxPhase = players.filter((p) => p.phase === maxPhase);
     const minScore = Math.min(...inMaxPhase.map((p) => p.score));
     return inMaxPhase.filter((p) => p.score === minScore).map((p) => p.name);
+  };
+
+  // === SAVE GAME ===
+  const saveGame = () => {
+    const saveData = {
+      players,
+      dealerIndex,
+      winner,
+      tieBreakerActive
+    };
+    localStorage.setItem('phase10-savedGame', JSON.stringify(saveData));
+  };
+
+  // === LOAD GAME ===
+  const loadGame = () => {
+    const saved = localStorage.getItem('phase10-savedGame');
+    if (!saved) return false;
+
+    const { players, dealerIndex, winner, tieBreakerActive } = JSON.parse(saved);
+    setPlayers(players);
+    setDealerIndex(dealerIndex);
+    setWinner(winner);
+    setTieBreakerActive(tieBreakerActive);
+    return true;
   };
 
   return (
@@ -129,7 +171,10 @@ export function GameProvider({ children }) {
           nextDealer,
           resetGame,
           fullResetGame,
-          applyRoundResults
+          applyRoundResults,
+          undoLastRound,
+          saveGame,
+          loadGame
         }}
       >
         {children}

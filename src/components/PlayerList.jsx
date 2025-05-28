@@ -1,3 +1,4 @@
+// MUI icons and components
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -27,14 +28,18 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
     setAllPlayers,
   } = useGameUpdate();
 
+  // State for game setup
   const [numPlayers, setNumPlayers] = useState('');
   const [names, setNames] = useState([]);
   const [dealerName, setDealerName] = useState('');
   const [setupComplete, setSetupComplete] = useState(players.length > 0);
+
+  // State for edit mode
   const [isEditing, setIsEditing] = useState(false);
   const [editedNames, setEditedNames] = useState([]);
   const [showValidationError, setShowValidationError] = useState(false);
 
+  // Trigger setup screen if 'New Game' button is clicked
   useEffect(() => {
     if (forceSetup) {
       setSetupComplete(false);
@@ -42,10 +47,11 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
       setNumPlayers('');
       setNames([]);
       setDealerName('');
-      clearForceSetup(); // only once
+      clearForceSetup(); // Run once
     }
   }, [forceSetup]);
 
+  // Helper to check for duplicate names
   const hasDuplicateNames = (arr) => {
     const nameSet = new Set();
     for (const name of arr) {
@@ -61,6 +67,7 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
     dealerName &&
     !hasDuplicateNames(names);
 
+  // Finalize setup and start the game
   const handleStartGame = () => {
     if (!canStart) {
       setShowValidationError(true);
@@ -73,6 +80,7 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
     setSetupComplete(true);
   };
 
+  // Move player up/down in list
   const movePlayer = (fromIndex, direction) => {
     const toIndex = fromIndex + direction;
     if (toIndex < 0 || toIndex >= players.length) return;
@@ -83,12 +91,14 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
     setAllPlayers(reordered);
   };
 
+  // Add new placeholder player
   const handleAddPlayer = () => {
     if (players.length < MAX_PLAYERS) {
       addPlayer(`Player ${players.length + 1}`);
     }
   };
 
+  // Toggle edit mode and commit name changes
   const toggleEditing = () => {
     if (!isEditing) {
       setEditedNames(players.map((p) => p.name));
@@ -103,6 +113,7 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
     setIsEditing((prev) => !prev);
   };
 
+  // --- Setup screen ---
   if (!setupComplete) {
     return (
       <Box>
@@ -110,6 +121,7 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
           Select Number of Players
         </Typography>
 
+        {/* Select number of players */}
         <Select
           value={numPlayers}
           onChange={(e) => {
@@ -128,6 +140,7 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
           ))}
         </Select>
 
+        {/* Input player names */}
         {names.map((name, i) => (
           <TextField
             key={i}
@@ -144,12 +157,14 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
           />
         ))}
 
+        {/* Duplicate name warning */}
         {hasDuplicateNames(names) && (
           <Typography color="error" sx={{ mb: 1 }}>
             Duplicate player names found. Please enter unique names.
           </Typography>
         )}
 
+        {/* Dealer selection dropdown */}
         {names.every((name) => name.trim()) && (
           <>
             <Typography variant="subtitle2" sx={{ mt: 2 }}>
@@ -173,6 +188,7 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
           </>
         )}
 
+        {/* Validation fallback */}
         {showValidationError && (
           <Typography color="error" sx={{ mb: 1 }}>
             Please fill all names, avoid duplicates, and select a dealer.
@@ -190,12 +206,14 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
     );
   }
 
+  // --- Edit/Review Players Screen ---
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
         Players
       </Typography>
 
+      {/* Edit player names */}
       {isEditing && (
         <>
           <List dense>
@@ -250,6 +268,7 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
             })}
           </List>
 
+          {/* Add player */}
           <Button
             variant="outlined"
             onClick={handleAddPlayer}
@@ -267,6 +286,7 @@ export default function PlayerList({ forceSetup, clearForceSetup }) {
         </>
       )}
 
+      {/* Edit button + dealer dropdown */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
         <Button variant="outlined" onClick={toggleEditing}>
           {isEditing ? 'Done Editing' : 'Edit Players'}

@@ -7,6 +7,9 @@ A single-page React app to track your Phase 10 games with friends.
 Track your Phase 10 games using a clean, responsive React + MUI interface.  
 Built to help you manage players, scores, phases, and dealer rotation in real time.
 
+## Deployed
+**Live Demo**: [phase10tracker.netlify.app](https://phase10tracker.netlify.app/)
+
 ## 🧩 Features
 
 - ✅ Add/edit/remove/reorder players (2–6)
@@ -21,9 +24,14 @@ Built to help you manage players, scores, phases, and dealer rotation in real ti
 - ✅ Tie-breaker logic (replay Phase 10 if tied)
 - ✅ Confetti celebration 🎉
 - ✅ Auto-scroll to winner announcement
+- ✅ "New Game" button resets app to setup screen (player count, names, dealer)
 - ✅ Game reset confirmation modal
 - ✅ Fully responsive (mobile-friendly)
 - ✅ LocalStorage save & restore
+- ✅ Undo last round with confirmation dialog and tooltip
+- ✅ Save game to localStorage (only one save slot)
+- ✅ Load saved game with overwrite warning
+- ✅ Tooltips for Save/Load/New Game actions
 
 ---
 
@@ -118,7 +126,7 @@ phase10-tracker/
 - Material UI (MUI)
 - JavaScript (ES6)
 - React Context / useState
-- LocalStorage
+- LocalStorage (manual JSON saving/loading)
 
 ## Getting Started
 
@@ -191,10 +199,15 @@ npm run dev
   - [ ] Dealer and tie-breaker state
 - [ ] Reset button clears all saved data
 
-### Reset Game Confirmation
-- [ ] Clicking “Reset Game” opens confirmation dialog
+### New Game Functionality
+- [ ] Clicking “New Game” opens confirmation dialog
 - [ ] “Cancel” dismisses with no change
-- [ ] “Yes, Reset” clears all progress and returns to setup
+- [ ] “Start New Game”:
+  - [ ] Clears all scores, phases, and players
+  - [ ] Returns to setup screen with:
+    - [ ] Select number of players
+    - [ ] Enter unique player names
+    - [ ] Choose starting dealer
 
 ### Responsive Design
 - [ ] Layout adapts to mobile (e.g., 375px width)
@@ -216,6 +229,16 @@ npm run dev
 - [ ] Tie-breaker works with reload
 - [ ] Dealer change works mid-game (in edit mode)
 - [ ] All error handling works as expected
+
+### Save/Load Game
+- [ ] “Save Game”:
+  - [ ] Saves current player list, phases, scores, and dealer
+  - [ ] Tooltip explains only one save slot
+  - [ ] Snackbar confirms save
+- [ ] “Load Game”:
+  - [ ] Prompts confirmation if a game is already in progress
+  - [ ] Loads saved game into state
+  - [ ] Shows alert if no save exists
 
 
 # Made by Gy Sohn
