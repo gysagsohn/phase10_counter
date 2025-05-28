@@ -16,11 +16,31 @@ import {
 import { useState } from 'react';
 import { useGameData, useGameUpdate } from '../contexts/GameContext';
 
-export default function ScoreTable() {
-  const { players, getLeadingPlayerNames } = useGameData();
-  const { updatePlayer } = useGameUpdate();
+function getRankings(players) {
+  return [...players].sort((a, b) => {
+    if ((b.phase ?? 1) !== (a.phase ?? 1)) {
+      return (b.phase ?? 1) - (a.phase ?? 1); // higher phase wins
+    }
+    return (a.score ?? 0) - (b.score ?? 0); // lower score wins
+  });
+}
 
+function getMedal(index, total, playerName, leadingNames) {
+  if (leadingNames.includes(playerName)) return '⭐';
+  if (index === 0) return '🥇';
+  if (index === 1) return '🥈';
+  if (index === 2) return '🥉';
+  if (index === total - 1) return '🥄';
+  return null;
+}
+
+
+export default function ScoreTable() {
+  const { players, getLeadingPlayerNames, winner } = useGameData();
+  const { updatePlayer } = useGameUpdate();
   const [isEditing, setIsEditing] = useState(false);
+
+  const rankedPlayers = getRankings(players);
 
   const handleChange = (player, field, value) => {
     const numericValue = parseInt(value, 10);
@@ -50,22 +70,26 @@ export default function ScoreTable() {
           </TableHead>
 
           <TableBody>
-            {players.map((player) => {
-              const isLeader = getLeadingPlayerNames().includes(player.name);
+            {rankedPlayers.map((player, index) => {
+              const isWinner = winner && !Array.isArray(winner) && player.name === winner.name;
               const phase = player.phase ?? 1;
               const score = player.score ?? 0;
               const lastPhase = player.lastPhasePlayed;
               const passed = player.lastPassedPhase;
+              const leadingNames = getLeadingPlayerNames();
+              const medal = getMedal(index, players.length, player.name, leadingNames);
 
               return (
-                <TableRow key={player.name}>
+                <TableRow
+                  key={player.name}
+                  sx={{
+                    backgroundColor: isWinner ? '#fff9c4' : 'inherit',
+                    fontWeight: isWinner ? 'bold' : 'normal'
+                  }}
+                >
                   <TableCell>
-                    {player.name}
-                    {isLeader && (
-                      <span role="img" aria-label="Leader" style={{ marginLeft: '0.5rem' }}>
-                        🥇
-                      </span>
-                    )}
+                    {player.name}{' '}
+                    {medal && <span role="img" aria-label="medal">{medal}</span>}
                   </TableCell>
 
                   <TableCell align="center">
@@ -101,14 +125,10 @@ export default function ScoreTable() {
                       <>
                         Phase {lastPhase}{' '}
                         {passed === true && (
-                          <CheckCircleIcon
-                            sx={{ color: 'green', fontSize: '1.2rem', verticalAlign: 'middle' }}
-                          />
+                          <CheckCircleIcon sx={{ color: 'green', fontSize: '1.2rem', verticalAlign: 'middle' }} />
                         )}
                         {passed === false && (
-                          <CancelIcon
-                            sx={{ color: 'red', fontSize: '1.2rem', verticalAlign: 'middle' }}
-                          />
+                          <CancelIcon sx={{ color: 'red', fontSize: '1.2rem', verticalAlign: 'middle' }} />
                         )}
                       </>
                     ) : (
