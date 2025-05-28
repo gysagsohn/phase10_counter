@@ -12,12 +12,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameData, useGameUpdate } from '../contexts/GameContext';
 
 const MAX_PLAYERS = 6;
 
-export default function PlayerList() {
+export default function PlayerList({ forceSetup, clearForceSetup }) {
   const { players, dealerIndex } = useGameData();
   const {
     addPlayer,
@@ -34,6 +34,17 @@ export default function PlayerList() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedNames, setEditedNames] = useState([]);
   const [showValidationError, setShowValidationError] = useState(false);
+
+  useEffect(() => {
+    if (forceSetup) {
+      setSetupComplete(false);
+      setIsEditing(false);
+      setNumPlayers('');
+      setNames([]);
+      setDealerName('');
+      clearForceSetup(); // only once
+    }
+  }, [forceSetup]);
 
   const hasDuplicateNames = (arr) => {
     const nameSet = new Set();
@@ -80,10 +91,8 @@ export default function PlayerList() {
 
   const toggleEditing = () => {
     if (!isEditing) {
-      // Entering edit mode
       setEditedNames(players.map((p) => p.name));
     } else {
-      // Exiting edit mode – apply changes
       players.forEach((player, idx) => {
         const newName = editedNames[idx].trim();
         if (newName && newName !== player.name) {
@@ -187,7 +196,7 @@ export default function PlayerList() {
         Players
       </Typography>
 
-      {isEditing ? (
+      {isEditing && (
         <>
           <List dense>
             {players.map((player, index) => {
@@ -256,7 +265,7 @@ export default function PlayerList() {
             </Typography>
           )}
         </>
-      ) : null}
+      )}
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
         <Button variant="outlined" onClick={toggleEditing}>

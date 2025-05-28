@@ -1,37 +1,47 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Stack } from '@mui/material';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Stack
+} from '@mui/material';
 import { useState } from 'react';
 import { useGameUpdate } from '../contexts/GameContext';
 
-export default function GameControls() {
-  const { resetGame } = useGameUpdate();
+export default function GameControls({ onNewGame }) {
+  const { fullResetGame } = useGameUpdate();
   const [open, setOpen] = useState(false);
 
-  const handleResetClick = () => {
-    setOpen(true); // Open confirmation dialog
+  const handleNewGameClick = () => {
+    setOpen(true); // Show confirmation dialog
   };
 
   const handleConfirm = () => {
-    resetGame();   // Proceed with reset
+    fullResetGame();    // Clear game data
+    onNewGame();        // Tell HomePage to show setup screen
     setOpen(false);
   };
 
   const handleCancel = () => {
-    setOpen(false); // Close dialog
+    setOpen(false);
   };
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Stack spacing={2} direction="row">
-        <Button variant="outlined" color="error" onClick={handleResetClick}>
-          Reset Game
+        <Button variant="outlined" color="error" onClick={handleNewGameClick}>
+          New Game
         </Button>
       </Stack>
 
       <Dialog open={open} onClose={handleCancel}>
-        <DialogTitle>Confirm Reset</DialogTitle>
+        <DialogTitle>Start New Game?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to reset the game? All player progress and scores will be lost.
+            This will reset all players, scores, and progress. Are you sure you want to start a new game?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -39,7 +49,7 @@ export default function GameControls() {
             Cancel
           </Button>
           <Button onClick={handleConfirm} color="error" variant="contained">
-            Reset
+            Start New Game
           </Button>
         </DialogActions>
       </Dialog>

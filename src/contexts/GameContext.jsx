@@ -55,6 +55,10 @@ export function GameProvider({ children }) {
     localStorage.removeItem('phase10-dealerIndex');
   };
 
+  const fullResetGame = () => {
+    resetGame(); // same for now
+  };
+
   const applyRoundResults = (resultsArray) => {
     const updatedPlayers = players.map((player) => {
       const result = resultsArray.find((r) => r.name === player.name);
@@ -124,6 +128,7 @@ export function GameProvider({ children }) {
           setDealer,
           nextDealer,
           resetGame,
+          fullResetGame,
           applyRoundResults
         }}
       >

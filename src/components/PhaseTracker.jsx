@@ -106,42 +106,47 @@ export default function PhaseTracker() {
           if (!player || !data) return null;
 
           return (
-            <Stack
-              key={player.name}
-              direction="row"
-              alignItems="center"
-              spacing={2}
-            >
-              <Typography sx={{ width: 120 }}>{player.name}</Typography>
+          <Stack
+            key={player.name}
+            direction={{ xs: 'column', sm: 'row' }} // column on extra small screens
+            alignItems="flex-start"
+            spacing={1}
+            sx={{
+              borderBottom: '1px solid #ccc',
+              pb: 1,
+              mb: 1
+            }}
+          >
+            <Typography sx={{ minWidth: 100 }}>{player.name}</Typography>
 
-              <TextField
-                label="Round Score"
-                type="text"
-                value={data.score}
-                onChange={(e) =>
-                  handleChange(index, 'score', e.target.value)
-                }
-                inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                size="small"
-                sx={{ width: 100 }}
-                error={data.scoreError}
-                helperText={
-                  data.scoreError ? 'Score must be a whole number' : ''
-                }
-              />
+            <TextField
+              label="Round Score"
+              type="text"
+              value={data.score}
+              onChange={(e) => handleChange(index, 'score', e.target.value)}
+              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              size="small"
+              sx={{ width: 100 }}
+              error={data.scoreError}
+              helperText={data.scoreError ? 'Score must be a whole number' : ''}
+            />
 
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={data.passedPhase}
-                    onChange={(e) =>
-                      handleChange(index, 'passedPhase', e.target.checked)
-                    }
-                  />
-                }
-                label="Passed Phase"
-              />
-            </Stack>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={data.passedPhase}
+                  onChange={(e) =>
+                    handleChange(index, 'passedPhase', e.target.checked)
+                  }
+                />
+              }
+              label="Passed Phase"
+              sx={{
+                ml: { sm: 2 },
+                mt: { xs: -1, sm: 0 }
+              }}
+            />
+          </Stack>
           );
         })}
       </Stack>

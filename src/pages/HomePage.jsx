@@ -1,6 +1,6 @@
 import { Box, Container, Divider, Stack, Typography } from '@mui/material';
 import confetti from 'canvas-confetti';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DealerIndicator from '../components/DealerIndicator';
 import GameControls from '../components/GameControls';
 import PhaseTracker from '../components/PhaseTracker';
@@ -11,6 +11,7 @@ import { useGameData } from '../contexts/GameContext';
 function HomePage() {
   const { winner, tieBreakerActive } = useGameData();
   const winnerRef = useRef(null);
+  const [forceSetup, setForceSetup] = useState(false);
 
   useEffect(() => {
     if (winner && !Array.isArray(winner) && winnerRef.current) {
@@ -23,16 +24,19 @@ function HomePage() {
     }
   }, [winner]);
 
+  const handleNewGame = () => {
+    setForceSetup(true);
+  };
+
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
-      {/* TITLE */}
       <Box sx={{ textAlign: 'center', mt: 2, mb: 2 }}>
         <Typography
           variant="h3"
           component="div"
           sx={{
             fontWeight: '900',
-            color: '#1976d2', // Phase 10 Blue
+            color: '#1976d2',
             letterSpacing: '0.1rem',
             textTransform: 'uppercase',
             fontFamily: 'Arial Black, sans-serif',
@@ -40,8 +44,6 @@ function HomePage() {
         >
           Phase 10 Tracker
         </Typography>
-
-        {/* Decorative Bars */}
         <Box sx={{ display: 'flex', height: '6px', mt: 2 }}>
           <Box sx={{ flex: 1, backgroundColor: '#e53935' }} />
           <Box sx={{ flex: 1, backgroundColor: '#1e88e5' }} />
@@ -50,9 +52,8 @@ function HomePage() {
         </Box>
       </Box>
 
-      {/* Game Sections */}
       <Box sx={{ my: 3 }}>
-        <PlayerList />
+        <PlayerList forceSetup={forceSetup} clearForceSetup={() => setForceSetup(false)} />
       </Box>
 
       <Divider sx={{ my: 2 }} />
@@ -63,15 +64,27 @@ function HomePage() {
 
       <Divider sx={{ my: 2 }} />
 
-      <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ my: 3 }}>
-        <PhaseTracker />
-        <DealerIndicator />
+      <Stack
+        spacing={2}
+        sx={{
+          my: 3,
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' }
+        }}
+      >
+        <Box sx={{ width: '100%' }}>
+          <PhaseTracker />
+        </Box>
+        <Box sx={{ width: '100%' }}>
+          <DealerIndicator />
+        </Box>
       </Stack>
 
       <Divider sx={{ my: 2 }} />
 
       <Box sx={{ my: 3 }}>
-        <GameControls />
+        <GameControls onNewGame={handleNewGame} />
       </Box>
 
       {winner && (

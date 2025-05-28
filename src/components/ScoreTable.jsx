@@ -11,7 +11,8 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography
+  Typography,
+  useMediaQuery
 } from '@mui/material';
 import { useState } from 'react';
 import { useGameData, useGameUpdate } from '../contexts/GameContext';
@@ -25,22 +26,57 @@ function getRankings(players) {
   });
 }
 
-function getMedal(index, total, playerName, leadingNames) {
-  if (leadingNames.includes(playerName)) return '⭐';
-  if (index === 0) return '🥇';
-  if (index === 1) return '🥈';
-  if (index === 2) return '🥉';
-  if (index === total - 1) return '🥄';
-  return null;
+function assignMedals(rankedPlayers, winnerDeclared) {
+  const medals = Array(rankedPlayers.length).fill(null);
+  if (!winnerDeclared) return medals;
+
+  let rank = 1;
+  for (let i = 0; i < rankedPlayers.length; i++) {
+    if (i > 0) {
+      const prev = rankedPlayers[i - 1];
+      const curr = rankedPlayers[i];
+      if (curr.phase !== prev.phase || curr.score !== prev.score) {
+        rank = i + 1;
+      }
+    }
+
+    if (rank === 1) medals[i] = '🥇';
+    else if (rank === 2) medals[i] = '🥈';
+    else if (rank === 3) medals[i] = '🥉';
+  }
+
+  // Wooden Spoon logic
+  const lowestPhase = Math.min(...rankedPlayers.map((p) => p.phase));
+  const spoonCandidates = rankedPlayers.filter(p => p.phase === lowestPhase);
+  const worstScore = Math.max(...spoonCandidates.map(p => p.score));
+  spoonCandidates.forEach(player => {
+    if (player.score === worstScore) {
+      const i = rankedPlayers.findIndex(p => p.name === player.name);
+      medals[i] = '🥄';
+    }
+  });
+
+  return medals;
 }
 
+function getStarLeaders(players) {
+  if (players.length === 0) return [];
+  const maxPhase = Math.max(...players.map((p) => p.phase));
+  const inMaxPhase = players.filter((p) => p.phase === maxPhase);
+  const minScore = Math.min(...inMaxPhase.map((p) => p.score));
+  return inMaxPhase.filter((p) => p.score === minScore).map((p) => p.name);
+}
 
 export default function ScoreTable() {
-  const { players, getLeadingPlayerNames, winner } = useGameData();
+  const { players, winner } = useGameData();
   const { updatePlayer } = useGameUpdate();
   const [isEditing, setIsEditing] = useState(false);
 
+  const isTinyScreen = useMediaQuery('(max-width:350px)');
   const rankedPlayers = getRankings(players);
+  const winnerDeclared = !!winner && !Array.isArray(winner);
+  const medals = assignMedals(rankedPlayers, winnerDeclared);
+  const starLeaders = getStarLeaders(players);
 
   const handleChange = (player, field, value) => {
     const numericValue = parseInt(value, 10);
@@ -62,79 +98,80 @@ export default function ScoreTable() {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell>Player</TableCell>
-              <TableCell align="center">Current Phase</TableCell>
-              <TableCell align="center">Score</TableCell>
-              <TableCell align="center">Last Phase</TableCell>
+              <TableCell sx={{ fontSize: isTinyScreen ? '0.7rem' : '0.875rem', p: isTinyScreen ? 0.5 : 1 }}>Player</TableCell>
+              <TableCell align="center" sx={{ fontSize: isTinyScreen ? '0.7rem' : '0.875rem', p: isTinyScreen ? 0.5 : 1 }}>Current Phase</TableCell>
+              <TableCell align="center" sx={{ fontSize: isTinyScreen ? '0.7rem' : '0.875rem', p: isTinyScreen ? 0.5 : 1 }}>Score</TableCell>
+              {!isTinyScreen && (
+                <TableCell align="center" sx={{ fontSize: '0.875rem' }}>Last Phase</TableCell>
+              )}
             </TableRow>
           </TableHead>
 
           <TableBody>
             {rankedPlayers.map((player, index) => {
-              const isWinner = winner && !Array.isArray(winner) && player.name === winner.name;
               const phase = player.phase ?? 1;
               const score = player.score ?? 0;
               const lastPhase = player.lastPhasePlayed;
               const passed = player.lastPassedPhase;
-              const leadingNames = getLeadingPlayerNames();
-              const medal = getMedal(index, players.length, player.name, leadingNames);
+              const medal = winnerDeclared
+                ? medals[index]
+                : (starLeaders.includes(player.name) ? '⭐' : null);
 
               return (
                 <TableRow
                   key={player.name}
                   sx={{
-                    backgroundColor: isWinner ? '#fff9c4' : 'inherit',
-                    fontWeight: isWinner ? 'bold' : 'normal'
+                    backgroundColor: medal === '🥇' ? '#fff9c4' : 'inherit',
+                    fontWeight: medal === '🥇' ? 'bold' : 'normal'
                   }}
                 >
-                  <TableCell>
-                    {player.name}{' '}
-                    {medal && <span role="img" aria-label="medal">{medal}</span>}
+                  <TableCell sx={{ fontSize: isTinyScreen ? '0.7rem' : '0.875rem', p: isTinyScreen ? 0.5 : 1 }}>
+                    {player.name} {medal && <span role="img" aria-label="medal">{medal}</span>}
                   </TableCell>
 
-                  <TableCell align="center">
+                  <TableCell align="center" sx={{ p: isTinyScreen ? 0.5 : 1 }}>
                     {isEditing ? (
                       <TextField
                         type="number"
                         value={phase}
                         onChange={(e) => handleChange(player, 'phase', e.target.value)}
                         size="small"
+                        sx={{ width: isTinyScreen ? 60 : 100 }}
                         inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                       />
                     ) : (
-                      phase
+                      <Typography sx={{ fontSize: isTinyScreen ? '0.7rem' : '0.875rem' }}>{phase}</Typography>
                     )}
                   </TableCell>
 
-                  <TableCell align="center">
+                  <TableCell align="center" sx={{ p: isTinyScreen ? 0.5 : 1 }}>
                     {isEditing ? (
                       <TextField
                         type="number"
                         value={score}
                         onChange={(e) => handleChange(player, 'score', e.target.value)}
                         size="small"
+                        sx={{ width: isTinyScreen ? 60 : 100 }}
                         inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                       />
                     ) : (
-                      score
+                      <Typography sx={{ fontSize: isTinyScreen ? '0.7rem' : '0.875rem' }}>{score}</Typography>
                     )}
                   </TableCell>
 
-                  <TableCell align="center">
-                    {lastPhase ? (
-                      <>
-                        Phase {lastPhase}{' '}
-                        {passed === true && (
-                          <CheckCircleIcon sx={{ color: 'green', fontSize: '1.2rem', verticalAlign: 'middle' }} />
-                        )}
-                        {passed === false && (
-                          <CancelIcon sx={{ color: 'red', fontSize: '1.2rem', verticalAlign: 'middle' }} />
-                        )}
-                      </>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
+                  {!isTinyScreen && (
+                    <TableCell align="center">
+                      {lastPhase ? (
+                        <>
+                          Phase {lastPhase}{' '}
+                          {passed === true && <CheckCircleIcon sx={{ color: 'green', fontSize: '1rem' }} />}
+                          {passed === false && <CancelIcon sx={{ color: 'red', fontSize: '1rem' }} />}
+                        </>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                  )}
                 </TableRow>
               );
             })}
