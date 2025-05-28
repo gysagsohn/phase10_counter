@@ -1,15 +1,17 @@
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import {
-    Box,
-    Button,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
-    Typography
+  Box,
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
 } from '@mui/material';
 import { useState } from 'react';
 import { useGameData, useGameUpdate } from '../contexts/GameContext';
@@ -41,14 +43,20 @@ export default function ScoreTable() {
           <TableHead>
             <TableRow>
               <TableCell>Player</TableCell>
-              <TableCell align="center">Phase</TableCell>
+              <TableCell align="center">Current Phase</TableCell>
               <TableCell align="center">Score</TableCell>
+              <TableCell align="center">Last Phase</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
             {players.map((player) => {
               const isLeader = getLeadingPlayerNames().includes(player.name);
+              const phase = player.phase ?? 1;
+              const score = player.score ?? 0;
+              const lastPhase = player.lastPhasePlayed;
+              const passed = player.lastPassedPhase;
+
               return (
                 <TableRow key={player.name}>
                   <TableCell>
@@ -64,13 +72,13 @@ export default function ScoreTable() {
                     {isEditing ? (
                       <TextField
                         type="number"
-                        value={player.phase}
+                        value={phase}
                         onChange={(e) => handleChange(player, 'phase', e.target.value)}
                         size="small"
                         inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                       />
                     ) : (
-                      player.phase
+                      phase
                     )}
                   </TableCell>
 
@@ -78,13 +86,33 @@ export default function ScoreTable() {
                     {isEditing ? (
                       <TextField
                         type="number"
-                        value={player.score}
+                        value={score}
                         onChange={(e) => handleChange(player, 'score', e.target.value)}
                         size="small"
                         inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
                       />
                     ) : (
-                      player.score
+                      score
+                    )}
+                  </TableCell>
+
+                  <TableCell align="center">
+                    {lastPhase ? (
+                      <>
+                        Phase {lastPhase}{' '}
+                        {passed === true && (
+                          <CheckCircleIcon
+                            sx={{ color: 'green', fontSize: '1.2rem', verticalAlign: 'middle' }}
+                          />
+                        )}
+                        {passed === false && (
+                          <CancelIcon
+                            sx={{ color: 'red', fontSize: '1.2rem', verticalAlign: 'middle' }}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      '-'
                     )}
                   </TableCell>
                 </TableRow>

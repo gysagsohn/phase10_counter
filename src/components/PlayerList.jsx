@@ -2,15 +2,15 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
-    Box,
-    Button,
-    IconButton,
-    List,
-    ListItem,
-    MenuItem,
-    Select,
-    TextField,
-    Typography,
+  Box,
+  Button,
+  IconButton,
+  List,
+  ListItem,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
 } from '@mui/material';
 import { useState } from 'react';
 import { useGameData, useGameUpdate } from '../contexts/GameContext';
@@ -32,6 +32,7 @@ export default function PlayerList() {
   const [dealerName, setDealerName] = useState('');
   const [setupComplete, setSetupComplete] = useState(players.length > 0);
   const [isEditing, setIsEditing] = useState(false);
+  const [editedNames, setEditedNames] = useState([]);
   const [showValidationError, setShowValidationError] = useState(false);
 
   const hasDuplicateNames = (arr) => {
@@ -61,10 +62,6 @@ export default function PlayerList() {
     setSetupComplete(true);
   };
 
-  const handleNameChange = (index, newName) => {
-    updatePlayer(players[index].name, 'name', newName);
-  };
-
   const movePlayer = (fromIndex, direction) => {
     const toIndex = fromIndex + direction;
     if (toIndex < 0 || toIndex >= players.length) return;
@@ -79,6 +76,22 @@ export default function PlayerList() {
     if (players.length < MAX_PLAYERS) {
       addPlayer(`Player ${players.length + 1}`);
     }
+  };
+
+  const toggleEditing = () => {
+    if (!isEditing) {
+      // Entering edit mode
+      setEditedNames(players.map((p) => p.name));
+    } else {
+      // Exiting edit mode – apply changes
+      players.forEach((player, idx) => {
+        const newName = editedNames[idx].trim();
+        if (newName && newName !== player.name) {
+          updatePlayer(player.name, 'name', newName);
+        }
+      });
+    }
+    setIsEditing((prev) => !prev);
   };
 
   if (!setupComplete) {
@@ -178,12 +191,12 @@ export default function PlayerList() {
         <>
           <List dense>
             {players.map((player, index) => {
+              const name = editedNames[index] || '';
+              const trimmed = name.trim().toLowerCase();
               const isDuplicate =
-                players.filter(
-                  (p) =>
-                    p.name.trim().toLowerCase() ===
-                    player.name.trim().toLowerCase()
-                ).length > 1;
+                editedNames.filter(
+                  (n, i) => i !== index && n.trim().toLowerCase() === trimmed
+                ).length > 0;
 
               return (
                 <ListItem
@@ -212,8 +225,12 @@ export default function PlayerList() {
                   }
                 >
                   <TextField
-                    value={player.name}
-                    onChange={(e) => handleNameChange(index, e.target.value)}
+                    value={name}
+                    onChange={(e) => {
+                      const updated = [...editedNames];
+                      updated[index] = e.target.value;
+                      setEditedNames(updated);
+                    }}
                     size="small"
                     fullWidth
                     error={isDuplicate}
@@ -242,7 +259,7 @@ export default function PlayerList() {
       ) : null}
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
-        <Button variant="outlined" onClick={() => setIsEditing(!isEditing)}>
+        <Button variant="outlined" onClick={toggleEditing}>
           {isEditing ? 'Done Editing' : 'Edit Players'}
         </Button>
 

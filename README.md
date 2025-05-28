@@ -94,6 +94,8 @@ Built to help you manage players, scores, phases, and dealer rotation in real ti
 ---
 
 ## File structure
+
+```
 phase10-tracker/
 ├── public/
 ├── src/
@@ -108,6 +110,7 @@ phase10-tracker/
 │   │   └── HomePage.jsx
 │   ├── App.jsx
 │   └── main.jsx (Vite)
+```
 
 ## Tech Stack
 
@@ -130,6 +133,89 @@ npm install
 # Start dev server
 npm run dev
 ```
+
+## 🧪 Testing Checklist
+
+### Setup Screen
+- [ ] Can select player count (2–6 only)
+- [ ] All player name inputs:
+  - [ ] Cannot be empty or whitespace-only
+  - [ ] Must be unique (duplicate names show error)
+- [ ] Dealer dropdown:
+  - [ ] Only shows valid player names
+  - [ ] Must be selected to proceed
+- [ ] “Start Game” button:
+  - [ ] Only enabled when all validation passes
+
+### Editing Players
+- [ ] Can toggle edit mode on/off
+- [ ] Can edit player names:
+  - [ ] Duplicate names show input error
+  - [ ] Whitespace-only names are rejected or trimmed
+- [ ] Can reorder players (Up/Down icons)
+- [ ] Can delete players
+- [ ] Dealer selection updates correctly
+
+### Phase Tracker (Round Entry)
+- [ ] Score input:
+  - [ ] Accepts only positive integers
+  - [ ] Rejects negatives, decimals, non-numbers
+  - [ ] Empty inputs default to 0
+- [ ] “Passed Phase” checkboxes:
+  - [ ] At least one player must pass phase
+- [ ] Round submission is blocked unless:
+  - [ ] A score is entered **or**
+  - [ ] At least one phase is passed
+- [ ] Inputs reset between rounds
+
+### ScoreTable
+- [ ] Displays player name, total score, current phase
+- [ ] Edit toggle allows inline changes
+- [ ] All values remain synced with game state
+
+### Dealer Logic
+- [ ] Dealer rotates each round (wraps at end)
+- [ ] Dealer is correctly highlighted in UI
+
+### Winner Detection & Tie-Breaker
+- [ ] Phase 10 + lowest score triggers winner
+- [ ] Confetti triggers on winner
+- [ ] Tie (multiple players finish Phase 10 with same score):
+  - [ ] Enters tie-breaker mode
+  - [ ] Only tied players continue at Phase 10
+  - [ ] Declares winner when one wins tie-breaker
+
+### LocalStorage Persistence
+- [ ] Reload restores:
+  - [ ] Players, scores, phases
+  - [ ] Dealer and tie-breaker state
+- [ ] Reset button clears all saved data
+
+### Reset Game Confirmation
+- [ ] Clicking “Reset Game” opens confirmation dialog
+- [ ] “Cancel” dismisses with no change
+- [ ] “Yes, Reset” clears all progress and returns to setup
+
+### Responsive Design
+- [ ] Layout adapts to mobile (e.g., 375px width)
+- [ ] Buttons and inputs remain accessible
+- [ ] No layout overflow or cut-off content
+
+###  Accessibility & Usability
+- [ ] All buttons/inputs have labels
+- [ ] Color contrast is readable
+- [ ] Tab/keyboard navigation works correctly
+- [ ] Focus states are visible and helpful
+
+###  Additional Manual Testing
+- [ ] Play full game with:
+  - [ ] 2 players
+  - [ ] 4 players
+  - [ ] 6 players
+- [ ] Mid-game score edits work
+- [ ] Tie-breaker works with reload
+- [ ] Dealer change works mid-game (in edit mode)
+- [ ] All error handling works as expected
 
 
 # Made by Gy Sohn

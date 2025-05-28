@@ -25,10 +25,32 @@ function HomePage() {
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom align="center">
-        Phase 10 Tracker
-      </Typography>
+      {/* TITLE */}
+      <Box sx={{ textAlign: 'center', mt: 2, mb: 2 }}>
+        <Typography
+          variant="h3"
+          component="div"
+          sx={{
+            fontWeight: '900',
+            color: '#1976d2', // Phase 10 Blue
+            letterSpacing: '0.1rem',
+            textTransform: 'uppercase',
+            fontFamily: 'Arial Black, sans-serif',
+          }}
+        >
+          Phase 10 Tracker
+        </Typography>
 
+        {/* Decorative Bars */}
+        <Box sx={{ display: 'flex', height: '6px', mt: 2 }}>
+          <Box sx={{ flex: 1, backgroundColor: '#e53935' }} />
+          <Box sx={{ flex: 1, backgroundColor: '#1e88e5' }} />
+          <Box sx={{ flex: 1, backgroundColor: '#43a047' }} />
+          <Box sx={{ flex: 1, backgroundColor: '#fdd835' }} />
+        </Box>
+      </Box>
+
+      {/* Game Sections */}
       <Box sx={{ my: 3 }}>
         <PlayerList />
       </Box>

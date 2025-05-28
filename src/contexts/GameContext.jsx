@@ -59,10 +59,16 @@ export function GameProvider({ children }) {
     const updatedPlayers = players.map((player) => {
       const result = resultsArray.find((r) => r.name === player.name);
       if (!result) return player;
+
+      const passed = result.passedPhase;
+      const updatedPhase = passed ? player.phase + 1 : player.phase;
+
       return {
         ...player,
         score: player.score + result.score,
-        phase: result.passedPhase ? player.phase + 1 : player.phase
+        phase: updatedPhase,
+        lastPhasePlayed: player.phase,
+        lastPassedPhase: passed
       };
     });
 
@@ -93,6 +99,12 @@ export function GameProvider({ children }) {
 
   const getLeadingPlayerNames = () => {
     if (players.length === 0) return [];
+
+    const allAtPhaseOne = players.every((p) => p.phase === 1);
+    const allAtZeroScore = players.every((p) => (p.score ?? 0) === 0);
+
+    if (allAtPhaseOne && allAtZeroScore) return [];
+
     const maxPhase = Math.max(...players.map((p) => p.phase));
     const inMaxPhase = players.filter((p) => p.phase === maxPhase);
     const minScore = Math.min(...inMaxPhase.map((p) => p.score));
@@ -100,7 +112,9 @@ export function GameProvider({ children }) {
   };
 
   return (
-    <GameDataContext.Provider value={{ players, dealerIndex, winner, tieBreakerActive, getLeadingPlayerNames }}>
+    <GameDataContext.Provider
+      value={{ players, dealerIndex, winner, tieBreakerActive, getLeadingPlayerNames }}
+    >
       <GameUpdateContext.Provider
         value={{
           addPlayer,
