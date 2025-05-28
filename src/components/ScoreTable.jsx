@@ -76,7 +76,8 @@ export default function ScoreTable() {
   const rankedPlayers = getRankings(players);
   const winnerDeclared = !!winner && !Array.isArray(winner);
   const medals = assignMedals(rankedPlayers, winnerDeclared);
-  const starLeaders = getStarLeaders(players);
+  const showStars = players.some(p => p.phase > 1 || p.score > 0);
+  const starLeaders = showStars ? getStarLeaders(players) : [];
 
   const handleChange = (player, field, value) => {
     const numericValue = parseInt(value, 10);
