@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 import { useGameData, useGameUpdate } from '../contexts/GameContext';
 
 export default function PhaseTracker() {
-  const { players } = useGameData();
+  const { players, tieBreakerActive } = useGameData();
   const { applyRoundResults, nextDealer, undoLastRound } = useGameUpdate();
 
   const [roundData, setRoundData] = useState([]);
@@ -60,7 +60,7 @@ export default function PhaseTracker() {
       (entry) => entry.score && parseInt(entry.score) > 0
     );
     const allScoresValid = roundData.every((entry) => !entry.scoreError);
-    return (atLeastOnePassed || atLeastOneScored) && allScoresValid;
+    return atLeastOnePassed && atLeastOneScored && allScoresValid;
   };
 
   const handleSubmit = () => {
@@ -109,6 +109,7 @@ export default function PhaseTracker() {
       <Stack spacing={2}>
         {players.map((player, index) => {
           const data = roundData[index];
+          if (tieBreakerActive && player.phase === 0) return null;
           if (!player || !data) return null;
 
           return (

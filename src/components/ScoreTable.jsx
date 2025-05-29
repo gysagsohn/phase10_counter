@@ -71,7 +71,7 @@ function getStarLeaders(players) {
 }
 
 export default function ScoreTable() {
-  const { players, winner } = useGameData();
+  const { players, winner, dealerIndex } = useGameData();
   const { updatePlayer } = useGameUpdate();
   const [isEditing, setIsEditing] = useState(false);
 
@@ -128,29 +128,34 @@ export default function ScoreTable() {
                 : (starLeaders.includes(player.name) ? '⭐' : null);
 
               return (
-                <TableRow
-                  key={player.name}
-                  sx={{
-                    backgroundColor: medal === '🥇' ? '#fff9c4' : 'inherit',
-                    fontWeight: medal === '🥇' ? 'bold' : 'normal'
-                  }}
-                >
+              <TableRow
+                key={player.name}
+                sx={{
+                  backgroundColor:
+                    index === dealerIndex ? '#e3f2fd' :
+                    medal === '🥇' ? '#fff9c4' : 'inherit',
+                  fontWeight: medal === '🥇' ? 'bold' : 'normal'
+                }}
+              >
                   {/* Player name + medal/star */}
                   <TableCell sx={{ fontSize: isTinyScreen ? '0.7rem' : '0.875rem', p: isTinyScreen ? 0.5 : 1 }}>
-                    {player.name} {medal && <span role="img" aria-label="medal">{medal}</span>}
+                    {player.name} {index === dealerIndex && '(Dealer)'} {medal && <span role="img" aria-label="medal">{medal}</span>}
                   </TableCell>
 
                   {/* Phase (editable if in edit mode) */}
                   <TableCell align="center" sx={{ p: isTinyScreen ? 0.5 : 1 }}>
                     {isEditing ? (
-                      <TextField
-                        type="number"
-                        value={phase}
-                        onChange={(e) => handleChange(player, 'phase', e.target.value)}
-                        size="small"
-                        sx={{ width: isTinyScreen ? 60 : 100 }}
-                        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                      />
+                    <TextField
+                      type="number"
+                      value={phase}
+                      onChange={(e) => {
+                        const capped = Math.min(parseInt(e.target.value), 10);
+                        handleChange(player, 'phase', capped);
+                      }}
+                      size="small"
+                      sx={{ width: isTinyScreen ? 60 : 100 }}
+                      inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', max: 10 }}
+                    />
                     ) : (
                       <Typography sx={{ fontSize: isTinyScreen ? '0.7rem' : '0.875rem' }}>{phase}</Typography>
                     )}

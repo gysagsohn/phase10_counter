@@ -1,5 +1,3 @@
-// GameControls.jsx
-
 import {
   Box,
   Button,
@@ -19,11 +17,11 @@ export default function GameControls({ onNewGame }) {
   const { fullResetGame, saveGame, loadGame } = useGameUpdate();
   const { players } = useGameData();
 
-  const [openConfirm, setOpenConfirm] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false); // new game
   const [openLoadConfirm, setOpenLoadConfirm] = useState(false);
+  const [openSaveConfirm, setOpenSaveConfirm] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  // Confirm New Game Reset
   const handleNewGameClick = () => setOpenConfirm(true);
   const handleConfirmNewGame = () => {
     fullResetGame();
@@ -31,22 +29,25 @@ export default function GameControls({ onNewGame }) {
     setOpenConfirm(false);
   };
 
-  // Save the current game
+  const alreadySaved = localStorage.getItem('phase10-savedGame');
+
   const handleSaveGame = () => {
-    saveGame();
-    setSnackbarOpen(true);
+    if (alreadySaved) {
+      setOpenSaveConfirm(true); // prompt overwrite confirm
+    } else {
+      saveGame();
+      setSnackbarOpen(true);
+    }
   };
 
-  // Load game logic — shows confirm if current players exist
   const handleLoadGame = () => {
     if (players.length > 0) {
-      setOpenLoadConfirm(true); // Prompt user to confirm overwrite
+      setOpenLoadConfirm(true); // ask to overwrite current game
     } else {
       attemptLoadGame();
     }
   };
 
-  // Execute the load logic
   const attemptLoadGame = () => {
     const loaded = loadGame();
     if (!loaded) {
@@ -58,28 +59,24 @@ export default function GameControls({ onNewGame }) {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Stack spacing={2} direction="row" flexWrap="wrap" justifyContent="center">
-
-        {/* Tooltip: Save Game */}
         <Tooltip title="Saves your current game. Only one save slot is available.">
           <Button variant="contained" color="primary" onClick={handleSaveGame}>
             Save Game
           </Button>
         </Tooltip>
 
-        {/* Tooltip: Load Game */}
         <Tooltip title="Loads your last saved game. This will replace current progress.">
           <Button variant="contained" color="primary" onClick={handleLoadGame}>
             Load Game
           </Button>
         </Tooltip>
 
-        {/* New Game button */}
         <Button variant="contained" color="primary" onClick={handleNewGameClick}>
           New Game
         </Button>
       </Stack>
 
-      {/* Confirm Dialog: New Game */}
+      {/* New Game Dialog */}
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Start New Game?</DialogTitle>
         <DialogContent>
@@ -95,7 +92,7 @@ export default function GameControls({ onNewGame }) {
         </DialogActions>
       </Dialog>
 
-      {/* Confirm Dialog: Load Game Overwrite */}
+      {/* Load Game Dialog */}
       <Dialog open={openLoadConfirm} onClose={() => setOpenLoadConfirm(false)}>
         <DialogTitle>Overwrite Current Game?</DialogTitle>
         <DialogContent>
@@ -112,7 +109,31 @@ export default function GameControls({ onNewGame }) {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar: Game Saved */}
+      {/* Save Game Dialog */}
+      <Dialog open={openSaveConfirm} onClose={() => setOpenSaveConfirm(false)}>
+        <DialogTitle>Overwrite Saved Game?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This will overwrite your previous saved game. Only one save slot is available.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenSaveConfirm(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              saveGame();
+              setSnackbarOpen(true);
+              setOpenSaveConfirm(false);
+            }}
+            color="primary"
+            variant="contained"
+          >
+            Save Game
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for save feedback */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

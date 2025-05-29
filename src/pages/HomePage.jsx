@@ -1,4 +1,16 @@
-import { Box, Container, Divider, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  Stack,
+  Typography,
+} from '@mui/material';
 import confetti from 'canvas-confetti';
 import { useEffect, useRef, useState } from 'react';
 import DealerIndicator from '../components/DealerIndicator';
@@ -6,35 +18,47 @@ import GameControls from '../components/GameControls';
 import PhaseTracker from '../components/PhaseTracker';
 import PlayerList from '../components/PlayerList';
 import ScoreTable from '../components/ScoreTable';
-import { useGameData } from '../contexts/GameContext';
+import { useGameData, useGameUpdate } from '../contexts/GameContext';
 
 function HomePage() {
-  // Pull winner state and tie-breaker mode from global context
   const { winner, tieBreakerActive } = useGameData();
-   // Ref for scrolling to the winner message
+  const { fullResetGame } = useGameUpdate();
+
+  const [showWinnerPopup, setShowWinnerPopup] = useState(false);
   const winnerRef = useRef(null);
-  // Used to force return to setup mode (used when New Game is triggered)
   const [forceSetup, setForceSetup] = useState(false);
 
-  // Trigger confetti and scroll to winner when game ends
+  // Tie-breaker alert popup
   useEffect(() => {
-    if (winner && !Array.isArray(winner) && winnerRef.current) {
-      winnerRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (tieBreakerActive) {
+      setTimeout(() => {
+        alert('Tie-breaker mode activated! Only tied players will continue. Replay Phase 10 to determine the final winner.');
+      }, 500);
+    }
+  }, [tieBreakerActive]);
+
+  // Confetti and winner popup
+  useEffect(() => {
+    if (winner && !Array.isArray(winner)) {
+      setShowWinnerPopup(true);
+      if (winnerRef.current) {
+        winnerRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
       confetti({
         particleCount: 150,
         spread: 100,
-        origin: { y: 0.6 }
+        origin: { y: 0.6 },
       });
     }
   }, [winner]);
 
-   // Handler to trigger setup screen from GameControls
-  const handleNewGame = () => {
-    setForceSetup(true);
-  };
-
+    const handleNewGame = () => {
+      fullResetGame();           
+      setForceSetup(true);       
+    };
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
+      {/* Title */}
       <Box sx={{ textAlign: 'center', mt: 2, mb: 2 }}>
         <Typography
           variant="h3"
@@ -57,26 +81,29 @@ function HomePage() {
         </Box>
       </Box>
 
+      {/* Players */}
       <Box sx={{ my: 3 }}>
         <PlayerList forceSetup={forceSetup} clearForceSetup={() => setForceSetup(false)} />
       </Box>
 
       <Divider sx={{ my: 2 }} />
 
+      {/* Scores */}
       <Box sx={{ my: 3 }}>
         <ScoreTable />
       </Box>
 
       <Divider sx={{ my: 2 }} />
 
-        <Stack
-          spacing={{ xs: 2, sm: 4 }} // more horizontal spacing on sm+
-          direction={{ xs: 'column', sm: 'row' }}
-          sx={{
-            my: 3,
-            alignItems: { xs: 'flex-start', sm: 'stretch' }
-          }}
-        >
+      {/* Round Input + Dealer */}
+      <Stack
+        spacing={{ xs: 2, sm: 4 }}
+        direction={{ xs: 'column', sm: 'row' }}
+        sx={{
+          my: 3,
+          alignItems: { xs: 'flex-start', sm: 'stretch' },
+        }}
+      >
         <Box sx={{ width: '100%' }}>
           <PhaseTracker />
         </Box>
@@ -87,10 +114,12 @@ function HomePage() {
 
       <Divider sx={{ my: 2 }} />
 
+      {/* Controls */}
       <Box sx={{ my: 3 }}>
         <GameControls onNewGame={handleNewGame} />
       </Box>
 
+      {/* Winner Box */}
       {winner && (
         <Box ref={winnerRef} sx={{ my: 4, textAlign: 'center' }}>
           <Typography variant="h5" color="success.main">
@@ -105,6 +134,29 @@ function HomePage() {
           )}
         </Box>
       )}
+
+      {/* Styled Winner Dialog */}
+      <Dialog open={showWinnerPopup} onClose={() => setShowWinnerPopup(false)}>
+        <DialogTitle>🎉 Game Over</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {winner?.name} wins Phase 10!
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowWinnerPopup(false)}>Close</Button>
+          <Button
+            onClick={() => {
+              setShowWinnerPopup(false); 
+              handleNewGame();          
+            }}
+            variant="contained"
+            color="primary"
+          >
+            New Game
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

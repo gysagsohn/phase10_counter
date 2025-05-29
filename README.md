@@ -10,13 +10,15 @@ Built to help you manage players, scores, phases, and dealer rotation in real ti
 ## Deployed
 **Live Demo**: [phase10tracker.netlify.app](https://phase10tracker.netlify.app/)
 
+**Git Hub Repo**: https://github.com/gysagsohn/phase10_counter
+
 ## 🧩 Features
 
 - ✅ Add/edit/remove/reorder players (2–6)
 - ✅ Prevent duplicate player names (setup & edit mode)
 - ✅ Set initial dealer
 - ✅ Round-based score & phase tracking
-- ✅ Only one player must pass phase per round to proceed
+- ✅ Score OR phase pass required per round (warning shown if not met)
 - ✅ Scores must be positive integers
 - ✅ Dealer rotates automatically each round
 - ✅ Editable score table (toggle edit mode)
@@ -32,6 +34,10 @@ Built to help you manage players, scores, phases, and dealer rotation in real ti
 - ✅ Save game to localStorage (only one save slot)
 - ✅ Load saved game with overwrite warning
 - ✅ Tooltips for Save/Load/New Game actions
+- ✅ Prevent deleting current/next dealer without confirmation  
+- ✅ Winner popup with confetti + “New Game” reset  
+- ✅ Tie-breaker mode popup + auto-player filtering  
+- ✅ Save game warns before overwriting (styled popup)  
 
 ---
 
@@ -58,9 +64,10 @@ Built to help you manage players, scores, phases, and dealer rotation in real ti
   - [x] Round-based score entry
   - [x] "Passed phase?" toggle
   - [x] Requires one player to pass per round
-  - [x] Validates scores as positive integers
+  - [x]Scores must be whole numbers (no negatives or decimals)
 
 - [x] `HomePage.jsx`: Combined layout and components
+
 
 ---
 
@@ -89,6 +96,9 @@ Built to help you manage players, scores, phases, and dealer rotation in real ti
   - [x] Duplicate name prevention
   - [x] Positive score inputs only
   - [x] One player must pass per round
+- [x] Styled dialog for dealer deletion confirmation
+- [x] Save game confirmation matches load game dialog style
+- [x] Winner dialog with “New Game” button that resets game and closes popup
 
 ---
 
@@ -145,101 +155,107 @@ npm run dev
 ## 🧪 Testing Checklist
 
 ### Setup Screen
-- [ ] Can select player count (2–6 only)
-- [ ] All player name inputs:
-  - [ ] Cannot be empty or whitespace-only
-  - [ ] Must be unique (duplicate names show error)
-- [ ] Dealer dropdown:
-  - [ ] Only shows valid player names
-  - [ ] Must be selected to proceed
-- [ ] “Start Game” button:
-  - [ ] Only enabled when all validation passes
+- [X] Can select player count (2–6 only)
+- [X] All player name inputs:
+  - [X] Cannot be empty or whitespace-only
+  - [X] Must be unique (duplicate names show error)
+- [X] Dealer dropdown:
+  - [X] Only shows valid player names
+  - [X] Must be selected to proceed - no as they might not be chaning this
+- [X] “Start Game” button:
+  - [X] Only enabled when all validation passes
 
 ### Editing Players
-- [ ] Can toggle edit mode on/off
-- [ ] Can edit player names:
-  - [ ] Duplicate names show input error
-  - [ ] Whitespace-only names are rejected or trimmed
-- [ ] Can reorder players (Up/Down icons)
-- [ ] Can delete players
-- [ ] Dealer selection updates correctly
+- [X] Can toggle edit mode on/off
+- [X] Can edit player names:
+  - [X] Duplicate names show input error
+  - [X] Whitespace-only names are rejected or trimmed
+- [X] Can reorder players (Up/Down icons)
+- [X] Can delete players
+- [X] Dealer selection updates correctly
 
 ### Phase Tracker (Round Entry)
-- [ ] Score input:
-  - [ ] Accepts only positive integers
-  - [ ] Rejects negatives, decimals, non-numbers
-  - [ ] Empty inputs default to 0
-- [ ] “Passed Phase” checkboxes:
-  - [ ] At least one player must pass phase
-- [ ] Round submission is blocked unless:
-  - [ ] A score is entered **or**
-  - [ ] At least one phase is passed
-- [ ] Inputs reset between rounds
+- [X] Score input:
+  - [X] Accepts only positive integers
+  - [X] Rejects negatives, decimals, non-numbers
+  - [X] Empty inputs default to 0
+- [X] “Passed Phase” checkboxes:
+  - [X] At least one player must pass phase
+- [X] Round submission is blocked unless:
+  - [X] A score is entered **or**
+  - [X] At least one phase is passed
+- [X] Inputs reset between rounds
 
 ### ScoreTable
-- [ ] Displays player name, total score, current phase
-- [ ] Edit toggle allows inline changes
-- [ ] All values remain synced with game state
+- [X] Displays player name, total score, current phase
+- [X] Edit toggle allows inline changes
+- [X] All values remain synced with game state
 
 ### Dealer Logic
-- [ ] Dealer rotates each round (wraps at end)
-- [ ] Dealer is correctly highlighted in UI
+- [X] Dealer rotates each round (wraps at end)
+- [X] Dealer is correctly highlighted in UI
 
 ### Winner Detection & Tie-Breaker
-- [ ] Phase 10 + lowest score triggers winner
-- [ ] Confetti triggers on winner
-- [ ] Tie (multiple players finish Phase 10 with same score):
-  - [ ] Enters tie-breaker mode
-  - [ ] Only tied players continue at Phase 10
-  - [ ] Declares winner when one wins tie-breaker
+- [X] Phase 10 + lowest score triggers winner
+- [X] Confetti triggers on winner
+- [X] Tie (multiple players finish Phase 10 with same score):
+  - [X] Enters tie-breaker mode
+  - [X] Only tied players continue at Phase 10
+  - [X] Declares winner when one wins tie-breaker (with styled popup)
 
 ### LocalStorage Persistence
-- [ ] Reload restores:
-  - [ ] Players, scores, phases
-  - [ ] Dealer and tie-breaker state
-- [ ] Reset button clears all saved data
+- [X] Reload restores:
+  - [X] Players, scores, phases
+  - [X] Dealer and tie-breaker state
+- [X] Reset button clears all saved data
 
 ### New Game Functionality
-- [ ] Clicking “New Game” opens confirmation dialog
-- [ ] “Cancel” dismisses with no change
-- [ ] “Start New Game”:
-  - [ ] Clears all scores, phases, and players
-  - [ ] Returns to setup screen with:
-    - [ ] Select number of players
-    - [ ] Enter unique player names
-    - [ ] Choose starting dealer
+- [X] Clicking “New Game” opens confirmation dialog
+- [X] “Cancel” dismisses with no change
+- [X] “Start New Game”:
+  - [X] Clears all scores, phases, and players
+  - [X] Returns to setup screen with:
+    - [X] Select number of players
+    - [X] Enter unique player names
+    - [X] Choose starting dealer
+[X] “New Game” in winner dialog:
+  [X] Resets game cleanly
+  [X] Closes dialog automatically
 
 ### Responsive Design
-- [ ] Layout adapts to mobile (e.g., 375px width)
-- [ ] Buttons and inputs remain accessible
-- [ ] No layout overflow or cut-off content
+- [X] Layout adapts to mobile (e.g., 375px width)
+- [X] Buttons and inputs remain accessible
+- [X] No layout overflow or cut-off content
 
 ###  Accessibility & Usability
-- [ ] All buttons/inputs have labels
-- [ ] Color contrast is readable
-- [ ] Tab/keyboard navigation works correctly
-- [ ] Focus states are visible and helpful
+- [X] All buttons/inputs have labels
+- [X] Color contrast is readable
+- [X] Tab/keyboard navigation works correctly
+- [X] Focus states are visible and helpful
 
 ###  Additional Manual Testing
-- [ ] Play full game with:
-  - [ ] 2 players
-  - [ ] 4 players
-  - [ ] 6 players
-- [ ] Mid-game score edits work
-- [ ] Tie-breaker works with reload
-- [ ] Dealer change works mid-game (in edit mode)
-- [ ] All error handling works as expected
+- [X] Play full game with:
+  - [X] 2 players
+  - [X] 4 players
+  - [X] 6 players
+- [X] Mid-game score edits work
+- [X] Tie-breaker works with reload
+- [X] Dealer change works mid-game (in edit mode)
+- [X] All error handling works as expected
 
 ### Save/Load Game
-- [ ] “Save Game”:
-  - [ ] Saves current player list, phases, scores, and dealer
-  - [ ] Tooltip explains only one save slot
-  - [ ] Snackbar confirms save
-- [ ] “Load Game”:
-  - [ ] Prompts confirmation if a game is already in progress
-  - [ ] Loads saved game into state
-  - [ ] Shows alert if no save exists
+- [X]“Save Game”:
+  - [X] Saves current player list, phases, scores, and dealer
+  - [X] Tooltip explains only one save slot
+  - [X] Snackbar confirms save
+- [X]“Load Game”:
+  - [X] Prompts confirmation if a game is already in progress
+  - [X] Loads saved game into state
+
 
 
 # Made by Gy Sohn
 Let me know when you're ready to start coding the `PlayerList.jsx` and I'll guide you step-by-step.
+
+> **Update Note (29 May 2025)**  
+> Latest version adds improved tie-breaker logic, styled popups for save/load/winner actions, dealer delete warnings, and bug fixes for score/phase validation!
