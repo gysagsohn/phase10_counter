@@ -102,15 +102,124 @@ Built to help you manage players, scores, phases, and dealer rotation in real ti
 
 ---
 
-## Future Features (Optional v2)
+## Full Logic & Error Handling Coverage
 
-- [ ] Export game as JSON/text
-- [ ] Round history view
-- [ ] Animate score updates
-- [ ] Game sounds (deal, confirm, etc.)
+This app includes logic-driven safeguards and UI feedback across all major features:
 
 ---
 
+### GameContext.jsx (Global State Logic)
+
+Handles all game rules and state transitions:
+
+- `addPlayer(name)`: Prevents duplicate names.
+- `removePlayer(name)`: Updates the player list, adjusts dealer index if needed.
+- `updatePlayer(oldName, field, value)`: Dynamic updates for name, score, phase.
+- `applyRoundResults(resultsArray)`:
+  - Increments phases based on checkboxes
+  - Adds scores
+  - Saves round state for undo
+  - Detects game-ending and tie-breaker scenarios
+- `undoLastRound()`: Reverts state to the previous round snapshot.
+- `saveGame()` & `loadGame()`: Store/retrieve full state from `localStorage`.
+- `getLeadingPlayerNames()`: Identifies current round leaders for ⭐ indicators.
+
+---
+
+### ScoreTable.jsx
+
+Manages game progression display and ranking:
+
+- `getRankings(players)`: Sorts by phase (desc) then score (asc).
+- `assignMedals()`: Assigns 🥇🥈🥉 and 🥄 (last place).
+- `getStarLeaders()`: Highlights players with top phase + lowest score.
+- Dealer row gets blue background, 🥇 gets yellow highlight.
+- Responsive adjustments for smaller screens.
+
+---
+
+### PlayerList.jsx
+
+Controls player creation and editing:
+
+- `hasDuplicateNames(names)`: Prevents same names (case insensitive).
+- Start Game only proceeds if:
+  - All names are non-empty
+  - All names are unique
+  - A dealer is selected
+- Player names are trimmed on input.
+- Can reorder players via up/down arrows.
+- Can delete players — warns if deleting current or next dealer.
+- Edit mode enables inline name editing with validation.
+
+---
+
+### DealerIndicator.jsx
+
+- Shows current & next dealer.
+- Allows dealer change via dropdown.
+- Dealer logic wraps correctly with modulo index calculation.
+
+---
+
+### GameControls.jsx
+
+Handles control actions:
+
+- **New Game**: Opens confirmation modal.
+- **Save Game**: Shows overwrite warning if one exists.
+- **Load Game**: Warns if current game has active players.
+- **Snackbar**: Shows success message after saving.
+
+---
+
+### 🎯 PhaseTracker.jsx – Core Round Validation
+
+#### 🔍 `isValidSubmission()` logic
+
+```JSX
+const isValidSubmission = () => {
+  const atLeastOnePassed = roundData.some((entry) => entry.passedPhase);
+  const atLeastOneScored = roundData.some(
+    (entry) => entry.score && parseInt(entry.score) > 0
+  );
+  const allScoresValid = roundData.every((entry) => !entry.scoreError);
+  const hasZeroScorePlayer = roundData.some(
+    (entry) => entry.score === '' || parseInt(entry.score) === 0
+  );
+
+  return (
+    atLeastOnePassed &&
+    atLeastOneScored &&
+    allScoresValid &&
+    hasZeroScorePlayer
+  );
+};
+```
+
+What this enforces:
+At least one player passed their phase
+
+At least one player scored points (> 0)
+
+All score inputs are valid whole numbers
+
+One player must have a score of 0 (or leave blank) to indicate they went out
+
+ Error Feedback to User:
+
+```JSX
+<Alert severity="error">
+  Please ensure:
+  <ul>
+    <li>At least one player passed their phase</li>
+    <li>At least one score is above 0</li>
+    <li>One player has a score of 0 (or left the score blank)</li>
+    <li>All scores are whole numbers</li>
+  </ul>
+</Alert>
+
+```
 ## File structure
 
 ```

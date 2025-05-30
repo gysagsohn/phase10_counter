@@ -60,7 +60,12 @@ export default function PhaseTracker() {
       (entry) => entry.score && parseInt(entry.score) > 0
     );
     const allScoresValid = roundData.every((entry) => !entry.scoreError);
-    return atLeastOnePassed && atLeastOneScored && allScoresValid;
+
+    const hasZeroScorePlayer = roundData.some(
+      (entry) => entry.score === '' || parseInt(entry.score) === 0
+    );
+
+    return atLeastOnePassed && atLeastOneScored && allScoresValid && hasZeroScorePlayer;
   };
 
   const handleSubmit = () => {
@@ -102,7 +107,13 @@ export default function PhaseTracker() {
 
       {showError && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Please ensure at least one player entered a score or passed their phase, and that all scores are whole numbers.
+          Please ensure:
+          <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+            <li>At least one player passed their phase</li>
+            <li>At least one score is above 0</li>
+            <li>One player has a score of 0 (or left the score blank)</li>
+            <li>All scores are whole numbers</li>
+          </ul>
         </Alert>
       )}
 
