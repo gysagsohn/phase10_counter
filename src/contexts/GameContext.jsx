@@ -46,7 +46,7 @@ export function GameProvider({ children }) {
 
   const nextDealer = () => {
     if (players.length === 0) return;
-    setDealerIndex((prev) => (prev + 1) % players.length);
+    setDealerIndex((dealerIndex + 1) % players.length); 
   };
 
   const setDealer = (index) => setDealerIndex(index);
